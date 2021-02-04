@@ -1,13 +1,9 @@
 #!/usr/bin/env python
 import rospy
-from std_msgs.msg import String
 import cv2
 import numpy as np
 from cv_bridge import CvBridge
 from sensor_msgs.msg import Image
-
-import cv2
-import numpy as np
 from lane_detection.msg import LaneCoords
 
 def run(lsa, lca, rsa, rca):
@@ -23,6 +19,7 @@ def run(lsa, lca, rsa, rca):
 
 leftLineCoordinate = (300, 750)
 rightLineCoordinate = (1100, 750)
+
 
 leftSlopeValues, leftConstantValues, rightSlopeValues, rightConstantValues = [], [], [], [];
 
@@ -62,6 +59,7 @@ def draw_lines(img, lines):
     img = np.copy(img)
     blank_image = np.zeros((img.shape[0], img.shape[1], 3), np.uint8)
     leftSlopeValues, rightSlopeValues, leftConstantValues, rightConstantValues = [], [], [], []
+    h = img.shape[0]
 
     if lines is not None:
         for line in lines:
@@ -71,49 +69,32 @@ def draw_lines(img, lines):
 
 
                 if leftDistance1 < rightDistance1:
-                    slopeLeft = (y2 - y1) / (x2 - x1)
-                    constLeft = y2 - (slopeLeft * x2)
+
+                    slopeLeft = -(float(y2 - y1) / float(x2 - x1))
+                    constLeft = float((h-y2)) - float((slopeLeft * x2))
                     leftSlopeValues.append(slopeLeft)
                     leftConstantValues.append(constLeft)
-                    # print('LEFT SLOPE= ' + str(slopeLeft))
-                    # print('LEFT CONST = ' + str(constLeft))
 
-
-                    print('y2= ' + str(y2))
-                    print('y1 = ' + str(y1))
-                    print('x2 = ' + str(x2))
-                    print('x1 = ' + str(x1))
-                    print(slopeLeft)
 
                 else:
 
-                    slopeRight = (y1 - y2) / (x2 - x1)
-                    constRight = y2 - (slopeRight * x2)
+                    slopeRight = float((y1 - y2)) / float((x2 - x1))
+                    constRight = float(h-y2) - float(slopeRight * x2)
                     rightSlopeValues.append(slopeRight)
                     rightConstantValues.append(constRight)
 
-                    # print('RIGHT SLOPE= ' + str(slopeRight))
-                    # print('RIGHT CONST = ' + str(constRight))
-                    # print('y2= ' + str(y2))
-                    # print('y1 = ' + str(y1))
-                    # print('x2 = ' + str(x2))
-                    # print('x1 = ' + str(x1))
-                    # print('RIGHT SLOPE= ' + str(slopeRight))
-
-
-                    # print('LEFT = ' + str(leftCoordinates))
                 cv2.line(blank_image, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
-        # leftSlopeAverage = np.average(leftSlopeValues)
-        # leftConstantAverage = np.average(leftConstantValues)
-        # rightSlopeAverage = np.average(rightSlopeValues)
-        # rightConstantAverage = np.average(rightConstantValues)
-        # leftSlopeValues = []
-        # leftConstantValues = []
-        # rightSlopeValues = []
-        # rightConstantValues = []
-        #
-        # run(leftSlopeAverage,leftConstantAverage,rightConstantAverage,rightConstantAverage)
+        leftSlopeAverage = np.average(leftSlopeValues)
+        leftConstantAverage = np.average(leftConstantValues)
+        rightSlopeAverage = np.average(rightSlopeValues)
+        rightConstantAverage = np.average(rightConstantValues)
+        leftSlopeValues = []
+        leftConstantValues = []
+        rightSlopeValues = []
+        rightConstantValues = []
+
+        run(leftSlopeAverage,leftConstantAverage,rightConstantAverage,rightConstantAverage)
         # print('LEFT SLOPE = ' + str(leftSlopeAverage))
         # print('LEFT CONST= ' + str(leftConstantAverage))
         # print('RIGHT SLOPE= ' + str(rightSlopeAverage))
@@ -128,7 +109,7 @@ def draw_lines(img, lines):
 
 def callback(data):
     # convert sensor_msgs/Image to OpenCV Image
-    print("hi")
+    
     bridge = CvBridge()
     frame = bridge.imgmsg_to_cv2(data, "bgr8")
     hls = cv2.cvtColor(frame, cv2.COLOR_BGR2HLS)

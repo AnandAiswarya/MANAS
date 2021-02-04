@@ -1,3 +1,3 @@
-int64[] LeftCoeff
-int64[] RightCoeff
+float64[] LeftCoeff
+float64[] RightCoeff
 Header header

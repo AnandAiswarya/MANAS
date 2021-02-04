@@ -162,7 +162,7 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-scripts/lane_publisher.py scripts/lane_subscriber.py
+scripts/lane_publisher.py scripts/lane_subscriber.py scripts/lane_sub2.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
  )
 
